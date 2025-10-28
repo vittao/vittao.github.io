@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plano de Migração: Locaweb para M365</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Calm Harmony (Slate, Blue, and Light Gray) -->
+    <!-- Application Structure Plan: The SPA uses a tabbed navigation ('Resumo', 'Roteiro', 'Custos') to break the dense migration plan into user-centric themes. The 'Resumo' tab acts as a dashboard with KPIs and a chart for a quick overview. 'Roteiro' uses a kanban-style layout (5 columns) to visually present the detailed phases and tasks, making the plan scannable. 'Custos' isolates financial data. This structure is chosen over a linear report for faster, non-linear exploration and better synthesis of key data (time, tasks, cost). -->
+    <!-- Visualization & Content Choices: 1. Report Info: Total hours per phase. Goal: Show effort distribution. Viz: Bar Chart. Interaction: Hover (tooltip). Justification: Quick comparison of phase intensity. Library: Chart.js (Canvas). 2. Report Info: Detailed tasks & hours. Goal: Organize the step-by-step plan. Viz: Thematic columns (HTML/Tailwind). Interaction: Tab navigation. Justification: Groups tasks logically by phase, better than a long list. 3. Report Info: Key stats (users, total hours). Goal: Inform (dashboard). Viz: KPI Cards (HTML/Tailwind). Interaction: None (static). Justification: Highlights most critical project metrics upfront. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .tab-button {
+            transition: background-color 0.2s, color 0.2s;
+        }
+        .tab-button.active {
+            border-bottom-color: #2563eb;
+            color: #2563eb;
+            font-weight: 600;
+        }
+        .task-item {
+            border-left: 4px solid #d1d5db;
+        }
+        .task-item:hover {
+            border-left-color: #3b82f6;
+            background-color: #f9fafb;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900">
+
+    <div class="min-h-screen">
+        
+        <header class="bg-white shadow-sm">
+            <div class="container mx-auto max-w-6xl px-4 py-5">
+                <h1 class="text-3xl font-bold text-blue-700">Plano de Migração de E-mail</h1>
+                <p class="text-lg text-slate-600">Locaweb (IMAP) para Microsoft 365</p>
+            </div>
+        </header>
+
+        <nav class="bg-white border-b border-gray-200 sticky top-0 z-10">
+            <div class="container mx-auto max-w-6xl px-4">
+                <div class="flex space-x-4">
+                    <button id="btn-resumo" class="tab-button py-4 px-3 text-sm md:text-base font-medium text-gray-600 border-b-2 border-transparent" onclick="showTab('resumo')">
+                        Resumo
+                    </button>
+                    <button id="btn-roteiro" class="tab-button py-4 px-3 text-sm md:text-base font-medium text-gray-600 border-b-2 border-transparent" onclick="showTab('roteiro')">
+                        Roteiro Detalhado
+                    </button>
+                    <button id="btn-custos" class="tab-button py-4 px-3 text-sm md:text-base font-medium text-gray-600 border-b-2 border-transparent" onclick="showTab('custos')">
+                        Visão de Custos
+                    </button>
+                </div>
+            </div>
+        </nav>
+
+        <main class="container mx-auto max-w-6xl p-4 md:p-8">
+
+            <div id="content-resumo" class="space-y-8">
+                
+                <section>
+                    <h2 class="text-2xl font-semibold text-slate-800 mb-4">Resumo Executivo</h2>
+                    <p class="text-slate-700 leading-relaxed">
+                        Este projeto detalha o roteiro para a migração de 12 caixas de e-mail do provedor Locaweb para a plataforma Microsoft 365. O objetivo é executar a transição com o mínimo de impacto para os usuários, garantindo a integridade dos dados e a continuidade dos serviços. A estratégia adotada será a de "Virada Direta" (Cutover) utilizando o protocolo IMAP, ideal para este volume de contas. O plano está estruturado em 5 fases principais: Planejamento, Preparação, Migração, Virada (Cutover) e Pós-Migração.
+                    </p>
+                </section>
+
+                <section>
+                    <h3 class="text-xl font-semibold text-slate-800 mb-4">Métricas Principais do Projeto</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div class="bg-white p-6 rounded-lg shadow-md border border-gray-100">
+                            <span class="text-4xl">👥</span>
+                            <h4 class="text-lg font-semibold mt-2">Caixas de E-mail</h4>
+                            <p class="text-3xl font-bold text-blue-700">12</p>
+                        </div>
+                        <div class="bg-white p-6 rounded-lg shadow-md border border-gray-100">
+                            <span class="text-4xl">⏱️</span>
+                            <h4 class="text-lg font-semibold mt-2">Esforço Total Estimado</h4>
+                            <p class="text-3xl font-bold text-blue-700">30.5 Horas</p>
+                        </div>
+                        <div class="bg-white p-6 rounded-lg shadow-md border border-gray-100">
+                            <span class="text-4xl">⚙️</span>
+                            <h4 class="text-lg font-semibold mt-2">Estratégia</h4>
+                            <p class="text-3xl font-bold text-blue-700">Virada Direta (IMAP)</p>
+                        </div>
+                    </div>
+                </section>
+                
+                <section class="bg-white p-6 rounded-lg shadow-md border border-gray-100">
+                    <h3 class="text-xl font-semibold text-slate-800 mb-4">Distribuição de Esforço por Fase</h3>
+                    <p class="text-slate-700 mb-6">
+                        O gráfico abaixo ilustra a estimativa de horas de trabalho técnico dedicadas a cada fase do projeto. A fase de Pós-Migração concentra a maior parte do esforço, focada na configuração dos dispositivos dos usuários e no suporte inicial (hypercare).
+                    </p>
+                    <div class="chart-container">
+                        <canvas id="horasChart"></canvas>
+                    </div>
+                </section>
+
+            </div>
+
+            <div id="content-roteiro" class="hidden space-y-8">
+                
+                <section>
+                    <h2 class="text-2xl font-semibold text-slate-800 mb-4">Roteiro Detalhado de Atividades</h2>
+                    <p class="text-slate-700 leading-relaxed mb-6">
+                        Abaixo está o detalhamento de cada fase do projeto, com as atividades específicas e suas respectivas estimativas de horas. A migração de contatos e calendários não é coberta pelo protocolo IMAP e deverá ser tratada separadamente, geralmente via exportação/importação de arquivos .PST ou .CSV pelos próprios usuários com orientação.
+                    </p>
+                    <div class="w-full overflow-x-auto pb-4">
+                        <div class="flex flex-col md:flex-row md:space-x-4 space-y-4 md:space-y-0 min-w-max md:min-w-full">
+
+                            <div class="flex-1 min-w-[280px] bg-white rounded-lg shadow-lg border border-gray-100">
+                                <h3 class="font-bold text-lg p-4 bg-slate-100 rounded-t-lg border-b">Fase 1: Planejamento (5h)</h3>
+                                <div class="p-4 space-y-3">
+                                    <div class="task-item p-3 rounded-md"><strong>Reunião de Kick-off:</strong> Alinhar escopo, cronograma e stakeholders. (1h)</div>
+                                    <div class="task-item p-3 rounded-md"><strong>Análise do Ambiente:</strong> Levantar tamanho das caixas, aliases e grupos na Locaweb. (2h)</div>
+                                    <div class="task-item p-3 rounded-md"><strong>Definição de Licenciamento:</strong> Escolher planos do M365 (ex: Business Basic). (1h)</div>
+                                    <div class="task-item p-3 rounded-md"><strong>Plano de Comunicação:</strong> Definir comunicados para os usuários. (1h)</div>
+                                </div>
+                            </div>
+                            
+                            <div class="flex-1 min-w-[280px] bg-white rounded-lg shadow-lg border border-gray-100">
+                                <h3 class="font-bold text-lg p-4 bg-slate-100 rounded-t-lg border-b">Fase 2: Preparação (6h)</h3>
+                                <div class="p-4 space-y-3">
+                                    <div class="task-item p-3 rounded-md"><strong>Aquisição de Licenças:</strong> Compra das 12 licenças M365. (0.5h)</div>
+                                    <div class="task-item p-3 rounded-md"><strong>Criação do Tenant M365:</strong> Setup inicial da plataforma. (1h)</div>
+                                    <div class="task-item p-3 rounded-md"><strong>Verificação de Domínio:</strong> Adicionar e provar posse do domínio .com.br no M365. (1h)</div>
+                                    <div class="task-item p-3 rounded-md"><strong>Criação de Usuários:</strong> Criar as 12 contas no M365 e atribuir licenças. (1.5h)</div>
+                                    <div class="task-item p-3 rounded-md"><strong>Setup da Migração IMAP:</strong> Criar batch de migração no M365 (requer lista de senhas). (2h)</div>
+                                </div>
+                            </div>
+
+                            <div class="flex-1 min-w-[280px] bg-white rounded-lg shadow-lg border border-gray-100">
+                                <h3 class="font-bold text-lg p-4 bg-slate-100 rounded-t-lg border-b">Fase 3: Migração (3.5h)</h3>
+                                <div class="p-4 space-y-3">
+                                    <div class="task-item p-3 rounded-md"><strong>Comunicação Inicial:</strong> Informar usuários sobre a data da virada. (0.5h)</div>
+                                    <div class="task-item p-3 rounded-md"><strong>Redução de TTL DNS:</strong> Baixar o TTL do registro MX (ex: 300s) 24h antes. (0.5h)</div>
+                                    <div class="task-item p-3 rounded-md"><strong>Sincronização Inicial:</strong> Iniciar o batch IMAP para copiar o grosso dos e-mails. (2h - monitoramento)</div>
+                                    <div class="task-item p-3 rounded-md"><strong>Agendamento da Virada:</strong> Definir janela de atuação (ex: fim de semana). (0.5h)</div>
+                                </div>
+                            </div>
+
+                            <div class="flex-1 min-w-[280px] bg-white rounded-lg shadow-lg border border-gray-100">
+                                <h3 class="font-bold text-lg p-4 bg-slate-100 rounded-t-lg border-b">Fase 4: Virada (3.5h)</h3>
+                                <div class="p-4 space-y-3">
+                                    <div class="task-item p-3 rounded-md"><strong>Comunicação da Virada:</strong> Informar usuários sobre o início da janela. (0.5h)</div>
+                                    <div class="task-item p-3 rounded-md"><strong>Alteração DNS:</strong> Mudar MX, SPF, CNAME (Autodiscover) e DKIM para M365. (1.5h)</div>
+                                    <div class="task-item p-3 rounded-md"><strong>Sincronização Final:</strong> Rodar sincronização incremental para e-mails restantes. (1h - monitoramento)</div>
+                                    <div class="task-item p-3 rounded-md"><strong>Testes de Fluxo:</strong> Validar envio e recebimento de e-mails internos e externos. (0.5h)</div>
+                                </div>
+                            </div>
+
+                            <div class="flex-1 min-w-[280px] bg-white rounded-lg shadow-lg border border-gray-100">
+                                <h3 class="font-bold text-lg p-4 bg-slate-100 rounded-t-lg border-b">Fase 5: Pós-Migração (12.5h)</h3>
+                                <div class="p-4 space-y-3">
+                                    <div class="task-item p-3 rounded-md"><strong>Configuração de Perfil:</strong> Suporte aos 12 usuários para configurar Outlook e mobile. (4h)</div>
+                                    <div class="task-item p-3 rounded-md"><strong>Migração Contatos/Agenda:</strong> Orientar usuários na exportação/importação (manual). (3h)</div>
+                                    <div class="task-item p-3 rounded-md"><strong>Hypercare:</strong> Suporte intensivo nos primeiros dias pós-virada. (4h)</div>
+                                    <div class="task-item p-3 rounded-md"><strong>Descomissionamento:</strong> Remover contas da Locaweb após 30 dias. (1h)</div>
+                                    <div class="task-item p-3 rounded-md"><strong>Encerramento:</strong> Reunião de fechamento do projeto. (0.5h)</div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+
+            <div id="content-custos" class="hidden space-y-8">
+                
+                <section>
+                    <h2 class="text-2xl font-semibold text-slate-800 mb-4">Visão Geral de Custos</h2>
+                    <p class="text-slate-700 leading-relaxed mb-6">
+                        A estrutura de custos para este projeto é dividida em duas categorias principais: licenciamento recorrente da Microsoft e os serviços de implementação pontuais.
+                    </p>
+                    
+                    <div class="space-y-6">
+                        <div class="bg-white p-6 rounded-lg shadow-md border border-gray-100">
+                            <h3 class="text-xl font-semibold text-blue-700 mb-3">1. Custos de Licenciamento (Recorrente)</h3>
+                            <p class="text-slate-700 mb-2">Refere-se ao custo mensal ou anual pago diretamente à Microsoft ou a um revendedor pelas assinaturas do M365.</p>
+                            <ul class="list-disc list-inside text-slate-700 space-y-1">
+                                <li><strong>Produto:</strong> Microsoft 365 Business Basic ou Standard (recomendado).</li>
+                                <li><strong>Quantidade:</strong> 12 licenças.</li>
+                                <li><strong>Estimativa:</strong> O M365 Business Basic tem um custo público a partir de R$ 28,60/usuário/mês (pagamento anual). O valor final depende do plano exato e do tipo de contrato.</li>
+                                <li><strong>Observação:</strong> Este é um custo operacional contínuo.</li>
+                            </ul>
+                        </div>
+
+                        <div class="bg-white p-6 rounded-lg shadow-md border border-gray-100">
+                            <h3 class="text-xl font-semibold text-blue-700 mb-3">2. Custos de Serviço (Implementação)</h3>
+                            <p class="text-slate-700 mb-2">Refere-se ao custo pontual (One-Time Fee) para a execução de todo o projeto de migração, cobrindo as horas técnicas estimadas.</p>
+                            <ul class="list-disc list-inside text-slate-700 space-y-1">
+                                <li><strong>Esforço Total:</strong> 30.5 horas de serviço técnico especializado.</li>
+                                <li><strong>Atividades:</strong> Cobre todas as 5 fases do projeto, desde o planejamento até o suporte pós-migração.</li>
+                                <li><strong>Observação:</strong> O valor final depende da tarifa/hora do profissional ou empresa contratada.</li>
+                            </ul>
+                        </div>
+
+                        <div class="bg-white p-6 rounded-lg shadow-md border border-gray-100">
+                            <h3 class="text-xl font-semibold text-blue-700 mb-3">3. Outras Considerações</h3>
+                            <ul class="list-disc list-inside text-slate-700 space-y-1">
+                                <li><strong>Ferramentas de Migração:</strong> Este plano assume o uso da ferramenta de migração IMAP nativa do Microsoft 365, que não tem custo adicional.</li>
+                                <li><strong>Serviço Locaweb:</strong> Recomenda-se manter o serviço de e-mail da Locaweb ativo por 15-30 dias após a virada como precaução, gerando um custo residual.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+    </div>
+
+    <footer class="bg-white border-t mt-12 py-6">
+        <div class="container mx-auto max-w-6xl px-4 text-center text-slate-500 text-sm">
+            <p>&copy; 2025 Relatório Interativo de Projeto. Este é um documento gerado para fins de planejamento.</p>
+        </div>
+    </footer>
+
+    <script>
+        let activeTab = 'resumo';
+        const tabs = ['resumo', 'roteiro', 'custos'];
+        const buttons = {
+            'resumo': document.getElementById('btn-resumo'),
+            'roteiro': document.getElementById('btn-roteiro'),
+            'custos': document.getElementById('btn-custos')
+        };
+        const contents = {
+            'resumo': document.getElementById('content-resumo'),
+            'roteiro': document.getElementById('content-roteiro'),
+            'custos': document.getElementById('content-custos')
+        };
+
+        function showTab(tabName) {
+            if (activeTab === tabName) return;
+
+            tabs.forEach(tab => {
+                buttons[tab].classList.remove('active');
+                contents[tab].classList.add('hidden');
+            });
+
+            buttons[tabName].classList.add('active');
+            contents[tabName].classList.remove('hidden');
+            
+            activeTab = tabName;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function initChart() {
+            const ctx = document.getElementById('horasChart').getContext('2d');
+            
+            const chartData = {
+                labels: ['Fase 1: Planejamento', 'Fase 2: Preparação', 'Fase 3: Migração', 'Fase 4: Virada', 'Fase 5: Pós-Migração'],
+                datasets: [{
+                    label: 'Horas Estimadas',
+                    data: [5, 6, 3.5, 3.5, 12.5],
+                    backgroundColor: [
+                        'rgba(59, 130, 246, 0.7)',
+                        'rgba(34, 197, 94, 0.7)',
+                        'rgba(249, 115, 22, 0.7)',
+                        'rgba(239, 68, 68, 0.7)',
+                        'rgba(14, 165, 233, 0.7)'
+                    ],
+                    borderColor: [
+                        'rgba(59, 130, 246, 1)',
+                        'rgba(34, 197, 94, 1)',
+                        'rgba(249, 115, 22, 1)',
+                        'rgba(239, 68, 68, 1)',
+                        'rgba(14, 165, 233, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            };
+
+            const config = {
+                type: 'bar',
+                data: chartData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return ` ${context.dataset.label}: ${context.raw} horas`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Horas Estimadas'
+                            }
+                        },
+                        y: {
+                            ticks: {
+                                autoSkip: false
+                            }
+                        }
+                    }
+                }
+            };
+
+            new Chart(ctx, config);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            showTab('resumo');
+            initChart();
+        });
+    </script>
+
+</body>
+</html>
